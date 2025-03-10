@@ -34,9 +34,10 @@ class AdvancedHint(
     val type: GameType,
     private val board: List<List<Cell>>,
     private val solvedBoard: List<List<Cell>>,
-    private var notes: List<Note> = emptyList(),
+    private var userNotes: List<Note> = emptyList(),
     private var settings: AdvancedHintSettings = AdvancedHintSettings()
 ) {
+    private var notes: List<Note> = emptyList()
     init {
         if (notes.isEmpty()) {
             notes = SudokuUtils().computeNotes(board, type)

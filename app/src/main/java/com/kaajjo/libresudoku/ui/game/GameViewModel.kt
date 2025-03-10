@@ -803,7 +803,7 @@ class GameViewModel @Inject constructor(
                 type = boardEntity.type,
                 board = gameBoard,
                 solvedBoard = solvedBoard,
-                notes = notes,
+                userNotes = notes,
                 settings = hintSettings
             )
 
