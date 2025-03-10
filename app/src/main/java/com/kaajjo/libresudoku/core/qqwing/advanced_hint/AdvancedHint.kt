@@ -51,8 +51,8 @@ class AdvancedHint(
         val hint: AdvancedHintData? = null
         if (settings.checkWrongValue) checkForWrongValue()?.let { return it }
         if (settings.fullHouse) checkForFullHouse()?.let { return it }
-        if (settings.nakedSingle) checkForNakedSingle()?.let { return it }
         if (settings.hiddenSingle) checkForHiddenSingle()?.let { return it }
+        if (settings.nakedSingle) checkForNakedSingle()?.let { return it }
         return hint
     }
 
@@ -83,7 +83,7 @@ class AdvancedHint(
         val singles = notes.groupBy { Pair(it.row, it.col) }
             .filter { it.value.size == 1 }
             .map { it.value }
-            .randomOrNull()
+            .firstOrNull()
 
         return if (!singles.isNullOrEmpty()) {
             val nakedSingle = singles.first()
@@ -142,37 +142,56 @@ class AdvancedHint(
         return null
     }
 
-    // TODO: Add boxes
     private fun checkForHiddenSingle(): AdvancedHintData? {
         if (notes.isEmpty()) return null
+        val notesBoxes = getNotesBoxes()
+
+        val singlesInBoxes = mutableListOf<Note>()
+        for (box in notesBoxes) {
+            val singlesInBox = box.groupBy { it.value }
+                .filter { it.value.size == 1 }
+                .map { it.value }
+                .firstOrNull()
+            if (singlesInBox?.firstOrNull() != null)
+                singlesInBoxes.addAll(singlesInBox)
+        }
         val singlesInRow = notes.groupBy { Pair(it.row, it.value) }
             .filter { it.value.size == 1 }
             .map { it.value }
-            .randomOrNull()
-        val singlesInColumn = notes.groupBy { Pair(it.row, it.value) }
+            .firstOrNull()
+        val singlesInColumn = notes.groupBy { Pair(it.col, it.value) }
             .filter { it.value.size == 1 }
             .map { it.value }
-            .randomOrNull()
+            .firstOrNull()
 
-        val pickedSingle = setOf(singlesInRow, singlesInColumn).randomOrNull() ?: return null
-        return if (pickedSingle.isNotEmpty()) {
-            val hiddenSingle = pickedSingle.first()
-            val cell = solvedBoard[hiddenSingle.row][hiddenSingle.col]
-            return AdvancedHintData(
-                titleRes = R.string.hint_hidden_single_title,
-                textResWithArg = Pair(
-                    R.string.hint_hidden_single_detail,
-                    listOf(
-                        cellStringFormat(cell),
-                        cell.value.toString()
-                    )
-                ),
-                targetCell = cell,
-                helpCells = emptyList()
-            )
-        } else {
-            null
-        }
+        val hiddenSingle: Note?
+        val hintDetail: Int
+
+        if (singlesInBoxes.firstOrNull() != null) {
+            hiddenSingle = singlesInBoxes.first()
+            hintDetail = R.string.hint_hidden_single_group_detail
+        } else if (singlesInRow?.firstOrNull() != null) {
+            hiddenSingle = singlesInRow.first()
+            hintDetail = R.string.hint_hidden_single_row_detail
+        } else if (singlesInColumn?.firstOrNull() != null) {
+            hiddenSingle = singlesInColumn.first()
+            hintDetail = R.string.hint_hidden_single_column_detail
+        } else
+            return null
+
+        val cell = solvedBoard[hiddenSingle.row][hiddenSingle.col]
+        return AdvancedHintData(
+            titleRes = R.string.hint_hidden_single_title,
+            textResWithArg = Pair(
+                hintDetail,
+                listOf(
+                    cellStringFormat(cell),
+                    cell.value.toString()
+                )
+            ),
+            targetCell = cell,
+            helpCells = emptyList()
+        )
     }
 
     private fun getRows(): List<List<Cell>> {
@@ -207,6 +226,20 @@ class AdvancedHint(
             }
         }
         return boxes
+    }
+
+    private fun getNotesBoxes(): List<List<Note>> {
+        val sectionWidth = type.sectionWidth
+        val sectionHeight = type.sectionHeight
+
+        val notesBoxes = MutableList(sectionWidth * sectionHeight) { mutableListOf<Note>() }
+        for (i in 0 until sectionWidth * sectionHeight) {
+            notesBoxes[i].addAll(notes.filter {
+                it.row / sectionHeight == i / sectionHeight &&
+                it.col / sectionWidth == i % sectionHeight
+            })
+        }
+        return notesBoxes
     }
 
     private fun cellStringFormat(cell: Cell) = "r${cell.row + 1}c${cell.col + 1}"

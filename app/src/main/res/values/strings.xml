@@ -369,7 +369,9 @@
     <string name="hint_naked_single_title">Naked single</string>
     <string name="hint_naked_single_detail">The cell %1$s has only one possible value left, so you can place the %2$s in this cell</string>
     <string name="hint_hidden_single_title">Hidden single</string>
-    <string name="hint_hidden_single_detail">The cell %1$s is the only cell in this group where %2$s can be</string>
+    <string name="hint_hidden_single_group_detail">The cell %1$s is the only cell in this group where %2$s can be</string>
+    <string name="hint_hidden_single_row_detail">The cell %1$s is the only cell in this row where %2$s can be</string>
+    <string name="hint_hidden_single_column_detail">The cell %1$s is the only cell in this column where %2$s can be</string>
     <string name="advanced_hint_title">Advanced hint</string>
     <string name="hint_wrong_value_title">Wrong value</string>
     <string name="hint_wron_value_detail">The value %1$s in cell %2$s is wrong</string>
