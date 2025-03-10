@@ -12,10 +12,11 @@ import com.kaajjo.libresudoku.core.utils.SudokuUtils
  * Naked single
  * Hidden single
  * Full House
+ * Locked candidates (type 1)
  * TODO:
  * Hidden subsets (pair, triple, quadruple)
  * Naked subsets (pair, triple, quadruple)
- * Locked candidates (all types)
+ * Locked candidates (type 2)
  * Wings (X, XY, XYZ)
  * Swordfish, Jellyfish
  * Chains and loops
@@ -27,7 +28,7 @@ import com.kaajjo.libresudoku.core.utils.SudokuUtils
  * @property type type of the game
  * @property board current sudoku board
  * @property solvedBoard solved sudoku board
- * @property notes notes for sudoku board
+ * @property userNotes user's notes for sudoku board
  * @property settings settings for an advanced hint
  */
 class AdvancedHint(
@@ -50,10 +51,20 @@ class AdvancedHint(
 
     fun getEasiestHint(): AdvancedHintData? {
         val hint: AdvancedHintData? = null
+
+        // easy hints
         if (settings.checkWrongValue) checkForWrongValue()?.let { return it }
         if (settings.fullHouse) checkForFullHouse()?.let { return it }
-        if (settings.hiddenSingle) checkForHiddenSingle()?.let { return it }
-        if (settings.nakedSingle) checkForNakedSingle()?.let { return it }
+        if (settings.hiddenSingle) checkForHiddenSingle(notes)?.let { return it }
+        if (settings.nakedSingle) checkForNakedSingle(notes)?.let { return it }
+
+        // hints using locked candidates
+        val lockedNotes = getLockedCandidateNotes()
+        if (settings.hiddenSingle) checkForHiddenSingle(lockedNotes)?.let { return it }
+        if (settings.nakedSingle) checkForNakedSingle(lockedNotes)?.let { return it }
+
+        // from here, hints are only changing notes
+
         return hint
     }
 
@@ -79,7 +90,7 @@ class AdvancedHint(
         return null
     }
 
-    private fun checkForNakedSingle(): AdvancedHintData? {
+    private fun checkForNakedSingle(notes: List<Note>): AdvancedHintData? {
         if (notes.isEmpty()) return null
         val singles = notes.groupBy { Pair(it.row, it.col) }
             .filter { it.value.size == 1 }
@@ -143,7 +154,7 @@ class AdvancedHint(
         return null
     }
 
-    private fun checkForHiddenSingle(): AdvancedHintData? {
+    private fun checkForHiddenSingle(notes: List<Note>): AdvancedHintData? {
         if (notes.isEmpty()) return null
         val notesBoxes = getNotesBoxes()
 
@@ -156,14 +167,15 @@ class AdvancedHint(
             if (singlesInBox?.firstOrNull() != null)
                 singlesInBoxes.addAll(singlesInBox)
         }
+        singlesInBoxes.sortBy { it.value }
         val singlesInRow = notes.groupBy { Pair(it.row, it.value) }
             .filter { it.value.size == 1 }
             .map { it.value }
-            .firstOrNull()
+            .minByOrNull { it[0].value }
         val singlesInColumn = notes.groupBy { Pair(it.col, it.value) }
             .filter { it.value.size == 1 }
             .map { it.value }
-            .firstOrNull()
+            .minByOrNull { it[0].value }
 
         val hiddenSingle: Note?
         val hintDetail: Int
@@ -241,6 +253,39 @@ class AdvancedHint(
             })
         }
         return notesBoxes
+    }
+
+    private fun getLockedCandidateNotes(): List<Note> {
+        val newNotes = notes.toMutableList()
+        val notesBoxes = getNotesBoxes()
+
+        notesBoxes.forEach { element ->
+            val candidatesInRow = element.groupBy { it.value }
+                .filter { it.value.groupBy { it2 -> it2.row }.size == 1 }
+            val candidatesInColumn = element.groupBy { it.value }
+                .filter { it.value.groupBy { it2 -> it2.col }.size == 1 }
+
+            candidatesInRow.forEach { candidate ->
+                val currentRow = candidate.value[0].row
+                val currentValue = candidate.value[0].value
+                newNotes.removeIf {
+                    it.row == currentRow &&
+                    it.value == currentValue &&
+                    it !in candidate.value
+                }
+            }
+            candidatesInColumn.forEach { candidate ->
+                val currentCol = candidate.value[0].col
+                val currentValue = candidate.value[0].value
+                newNotes.removeIf {
+                    it.col == currentCol &&
+                    it.value == currentValue &&
+                    it !in candidate.value
+                }
+            }
+        }
+
+        return newNotes
     }
 
     private fun cellStringFormat(cell: Cell) = "r${cell.row + 1}c${cell.col + 1}"
