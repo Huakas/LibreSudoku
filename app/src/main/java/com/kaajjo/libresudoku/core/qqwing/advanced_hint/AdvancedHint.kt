@@ -59,9 +59,11 @@ class AdvancedHint(
         if (settings.nakedSingle) checkForNakedSingle(notes)?.let { return it }
 
         // hints using locked candidates
-        val lockedNotes = getLockedCandidateNotes()
-        if (settings.hiddenSingle) checkForHiddenSingle(lockedNotes)?.let { return it }
-        if (settings.nakedSingle) checkForNakedSingle(lockedNotes)?.let { return it }
+        if (settings.lockedCandidates) {
+            val lockedNotes = getLockedCandidateNotes()
+            if (settings.hiddenSingle) checkForHiddenSingle(lockedNotes)?.let { return it }
+            if (settings.nakedSingle) checkForNakedSingle(lockedNotes)?.let { return it }
+        }
 
         // from here, hints are only changing notes
 
@@ -255,32 +257,72 @@ class AdvancedHint(
         return notesBoxes
     }
 
-    private fun getLockedCandidateNotes(): List<Note> {
-        val newNotes = notes.toMutableList()
+    private fun getLockedCandidates1(): Pair<List<List<Note>>, List<List<Note>>> {
+        val returnObject = Pair(mutableListOf<List<Note>>(), mutableListOf<List<Note>>())
         val notesBoxes = getNotesBoxes()
-
         notesBoxes.forEach { element ->
             val candidatesInRow = element.groupBy { it.value }
                 .filter { it.value.groupBy { it2 -> it2.row }.size == 1 }
+                .map { it.value }
             val candidatesInColumn = element.groupBy { it.value }
                 .filter { it.value.groupBy { it2 -> it2.col }.size == 1 }
+                .map { it.value }
 
-            candidatesInRow.forEach { candidate ->
-                val currentRow = candidate.value[0].row
-                val currentValue = candidate.value[0].value
+            returnObject.first.addAll(candidatesInRow)
+            returnObject.second.addAll(candidatesInColumn)
+        }
+        return returnObject
+    }
+
+    private fun getLockedCandidates2(): Pair<List<List<Note>>, List<List<Note>>> {
+        val sectionWidth = type.sectionWidth
+        val sectionHeight = type.sectionHeight
+
+        val returnObject = Pair(mutableListOf<List<Note>>(), mutableListOf<List<Note>>())
+        val newNotes = notes.toMutableList()
+        newNotes.groupBy { it.row }
+            .forEach { rowItem ->
+                val candidatesInRow = rowItem.value.groupBy { it.value }
+                    .filter { it.value.groupBy { it2 -> it2.col / sectionWidth }.size == 1 }
+                    .map { it.value }
+
+                returnObject.first.addAll(candidatesInRow)
+            }
+        newNotes.groupBy { it.col }
+            .forEach { colItem ->
+                val candidatesInCol = colItem.value.groupBy { it.value }
+                    .filter { it.value.groupBy { it2 -> it2.row / sectionHeight }.size == 1 }
+                    .map { it.value }
+
+                returnObject.first.addAll(candidatesInCol)
+            }
+        return returnObject
+    }
+
+    private fun getLockedCandidateNotes(): List<Note> {
+        val newNotes = notes.toMutableList()
+
+        // locked candidates type 1
+        val candidates1 = getLockedCandidates1()
+        candidates1.first.forEach { row ->
+            row.forEach { candidate ->
+                val currentRow = candidate.row
+                val currentValue = candidate.value
                 newNotes.removeIf {
                     it.row == currentRow &&
                     it.value == currentValue &&
-                    it !in candidate.value
+                    it !in row
                 }
             }
-            candidatesInColumn.forEach { candidate ->
-                val currentCol = candidate.value[0].col
-                val currentValue = candidate.value[0].value
+        }
+        candidates1.second.forEach { col ->
+            col.forEach { candidate ->
+                val currentCol = candidate.col
+                val currentValue = candidate.value
                 newNotes.removeIf {
                     it.col == currentCol &&
                     it.value == currentValue &&
-                    it !in candidate.value
+                    it !in col
                 }
             }
         }

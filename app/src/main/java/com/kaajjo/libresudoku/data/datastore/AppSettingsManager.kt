@@ -104,6 +104,7 @@ class AppSettingsManager(context: Context) {
     private val ahNakedSingle = booleanPreferencesKey("ah_naked_single")
     private val ahHiddenSingle = booleanPreferencesKey("ah_hidden_single")
     private val ahCheckWrongValue = booleanPreferencesKey("ah_check_wrong_value")
+    private val ahLockedCandidates = booleanPreferencesKey("ah_locked_candidates")
 
     private val autoUpdateChannelKey = intPreferencesKey("auto_update")
     private val updateDismissedNameKey = stringPreferencesKey("update_dismissed_name") // name of the update that was dismissed
@@ -407,12 +408,14 @@ class AppSettingsManager(context: Context) {
         val nakedSingle = settings[ahNakedSingle] ?: true
         val hiddenSingle = settings[ahHiddenSingle] ?: true
         val checkWrongValue = settings[ahCheckWrongValue] ?: true
+        val lockedCandidates = settings[ahLockedCandidates] ?: true
 
         AdvancedHintSettings(
             fullHouse = fullHouse,
             nakedSingle = nakedSingle,
             hiddenSingle = hiddenSingle,
-            checkWrongValue = checkWrongValue
+            checkWrongValue = checkWrongValue,
+            lockedCandidates = lockedCandidates
         )
     }
 
@@ -422,6 +425,7 @@ class AppSettingsManager(context: Context) {
             settings[ahNakedSingle] = ahSettings.nakedSingle
             settings[ahHiddenSingle] = ahSettings.hiddenSingle
             settings[ahCheckWrongValue] = ahSettings.checkWrongValue
+            settings[ahLockedCandidates] = ahSettings.lockedCandidates
         }
     }
 

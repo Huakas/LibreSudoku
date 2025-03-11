@@ -375,6 +375,9 @@
     <string name="advanced_hint_title">Advanced hint</string>
     <string name="hint_wrong_value_title">Wrong value</string>
     <string name="hint_wron_value_detail">The value %1$s in cell %2$s is wrong</string>
+    <string name="hint_locked_candidates_title">Locked candidates</string>
+    <string name="hint_locked_candidates_row_detail">The number %1$s can only go into one row in this block, so you can remove all other %1$s from the rest of the row</string>
+    <string name="hint_locked_candidates_column_detail">The number %1$s can only go into one column in this block, so you can remove all other %1$s from the rest of the column</string>
     <string name="advanced_hint_summary">An experimental hint system</string>
     <string name="nav_back">Back</string>
     <string name="action_apply">Apply</string>

@@ -9,5 +9,6 @@ data class AdvancedHintSettings(
     val fullHouse: Boolean = true,
     val nakedSingle: Boolean = true,
     val hiddenSingle: Boolean = true,
-    val checkWrongValue: Boolean = true
+    val checkWrongValue: Boolean = true,
+    val lockedCandidates: Boolean = true
 )

@@ -122,6 +122,19 @@ fun SettingsAdvancedHintScreen(
                 )
             }
             item {
+                TechniqueItem(
+                    title = stringResource(R.string.hint_locked_candidates_title),
+                    checked = advancedHintSettings.lockedCandidates,
+                    onClick = {
+                        viewModel.updateAdvancedHintSettings(
+                            advancedHintSettings.copy(
+                                lockedCandidates = !advancedHintSettings.lockedCandidates
+                            )
+                        )
+                    }
+                )
+            }
+            item {
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
