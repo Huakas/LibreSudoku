@@ -1,6 +1,7 @@
 package com.kaajjo.libresudoku.core.qqwing.advanced_hint
 
 import com.kaajjo.libresudoku.core.Cell
+import com.kaajjo.libresudoku.core.Note
 
 /**
  * Data that [AdvancedHint] returns
@@ -13,6 +14,7 @@ import com.kaajjo.libresudoku.core.Cell
 data class AdvancedHintData(
     val titleRes: Int,
     val textResWithArg: Pair<Int, List<String>>,
-    val targetCell: Cell,
+    val targetCell: Cell? = null,
+    val targetNotes: List<Note>? = null,
     val helpCells: List<Cell>
 )

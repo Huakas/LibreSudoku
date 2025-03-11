@@ -427,6 +427,15 @@ class GameViewModel @Inject constructor(
         }
     }
 
+    private fun setNote(note: Note) {
+        notes = if (notes.contains(note)) {
+            removeNote(note.value, note.row, note.col)
+        } else {
+            notesTaken++
+            addNote(note.value, note.row, note.col)
+        }
+    }
+
     var timeText by mutableStateOf("00:00")
     private var duration = Duration.ZERO
     private lateinit var timer: Timer
@@ -821,10 +830,18 @@ class GameViewModel @Inject constructor(
     fun applyAdvancedHint() {
         viewModelScope.launch(Dispatchers.Default) {
             val cell = _advancedHintData.value?.targetCell
+            val newNotes = _advancedHintData.value?.targetNotes
             if (cell != null) {
                 currCell = gameBoard[cell.row][cell.col]
                 digitFirstNumber = cell.value
                 processInput(cell, true)
+                cancelAdvancedHint()
+            } else if (newNotes != null) {
+                newNotes.forEach {
+                    setNote(it)
+                }
+                cancelAdvancedHint()
+            } else {
                 cancelAdvancedHint()
             }
         }

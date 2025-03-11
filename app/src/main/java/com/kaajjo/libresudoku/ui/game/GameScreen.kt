@@ -371,7 +371,7 @@ fun GameScreen(
                     zoomable = viewModel.gameType == GameType.Default12x12 || viewModel.gameType == GameType.Killer12x12,
                     crossHighlight = crossHighlight,
                     cages = viewModel.cages,
-                    cellsToHighlight = if (advancedHintMode && advancedHintData != null) advancedHintData!!.helpCells + advancedHintData!!.targetCell else null
+                    cellsToHighlight = if (advancedHintMode && advancedHintData != null) if (advancedHintData!!.targetCell != null) advancedHintData!!.helpCells + advancedHintData!!.targetCell!! else advancedHintData!!.helpCells else null
                 )
             }
 

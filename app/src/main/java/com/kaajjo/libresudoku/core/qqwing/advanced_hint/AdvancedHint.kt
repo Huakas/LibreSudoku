@@ -39,10 +39,10 @@ class AdvancedHint(
     private var settings: AdvancedHintSettings = AdvancedHintSettings()
 ) {
     private var notes: List<Note> = emptyList()
+    private var advancedNotes: MutableList<Note> = mutableListOf()
     init {
-        if (notes.isEmpty()) {
-            notes = SudokuUtils().computeNotes(board, type)
-        }
+        notes = SudokuUtils().computeNotes(board, type)
+        advancedNotes = notes.toMutableList()
     }
 
     private val rows = getRows()
@@ -66,6 +66,24 @@ class AdvancedHint(
         }
 
         // from here, hints are only changing notes
+        // TODO: find a threshold or other method to decide on the "add all notes" hint
+        if (userNotes.size < notes.groupBy { Pair(it.row, it.col) }.size * 2) {
+            val helpCells = mutableListOf<Cell>()
+            notes.groupBy { Pair(it.row, it.col) }
+                .forEach {
+                    helpCells.add(Cell(it.key.first, it.key.second))
+                }
+
+            return AdvancedHintData(
+                titleRes = R.string.hint_add_all_notes_title,
+                textResWithArg = Pair(
+                    R.string.hint_add_all_notes_detail,
+                    listOf()
+                ),
+                targetNotes = notes.filter { !userNotes.contains(it) },
+                helpCells = helpCells
+            )
+        }
 
         return hint
     }

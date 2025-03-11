@@ -378,6 +378,8 @@
     <string name="hint_locked_candidates_title">Locked candidates</string>
     <string name="hint_locked_candidates_row_detail">The number %1$s can only go into one row in this block, so you can remove all other %1$s from the rest of the row</string>
     <string name="hint_locked_candidates_column_detail">The number %1$s can only go into one column in this block, so you can remove all other %1$s from the rest of the column</string>
+    <string name="hint_add_all_notes_title">Use notes</string>
+    <string name="hint_add_all_notes_detail">To continue, add all possible numbers as notes to the field</string>
     <string name="advanced_hint_summary">An experimental hint system</string>
     <string name="nav_back">Back</string>
     <string name="action_apply">Apply</string>
